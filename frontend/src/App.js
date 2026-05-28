@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import axios from "axios";
 import "./App.css";
@@ -13,10 +12,9 @@ function App() {
   const [emotion, setEmotion] = useState("");
   const [confidence, setConfidence] = useState("");
 
-  const [loading, setLoading] = useState(false);
-  
-const [spamData, setSpamData] = useState(null);
+  const [spamData, setSpamData] = useState(null);
 
+  const [loading, setLoading] = useState(false);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -25,7 +23,7 @@ const [spamData, setSpamData] = useState(null);
   const handleUpload = async () => {
 
     if (!file) {
-      alert("Please upload an audio file");
+      alert("Please upload a file");
       return;
     }
 
@@ -51,15 +49,13 @@ const [spamData, setSpamData] = useState(null);
 
       setEmotion(response.data.emotion_analysis.emotion);
       setConfidence(response.data.emotion_analysis.confidence);
+
       setSpamData(response.data.spam_analysis);
-
-
-
 
     } catch (error) {
 
       console.error(error);
-      alert("Error uploading file");
+      alert("Upload failed");
 
     } finally {
 
@@ -71,96 +67,117 @@ const [spamData, setSpamData] = useState(null);
   return (
     <div className="app">
 
-      <div className="container">
+      <div className="main-container">
 
-        <h1>AI Voice Analyzer</h1>
+        <div className="top-section">
 
-        <p className="subtitle">
-          Whisper + NLP Emotion Detection
-        </p>
+          <div>
+            <h1>AI Analyzer</h1>
+            <p className="subtitle">
+              Whisper • Emotion AI • Spam Detection
+            </p>
+          </div>
 
-        <input
-          type="file"
-          
-          accept="audio/*,video/*"
+          <div className="upload-box">
 
+            <input
+              type="file"
+              accept="audio/*,video/*"
+              onChange={handleFileChange}
+            />
 
-          onChange={handleFileChange}
-        />
+            <button onClick={handleUpload}>
+              Analyze Recording
+            </button>
 
-        <button onClick={handleUpload}>
-          Analyze Audio
-        </button>
+          </div>
+
+        </div>
 
         {loading && (
-          <div className="loading">
-            Processing Audio...
+          <div className="loading-card">
+            Processing audio and generating analysis...
           </div>
         )}
 
-        {emotion && (
+        <div className="analysis-grid">
+
           <div className="card emotion-card">
-            <h2>Detected Emotion</h2>
+            <h2>Emotion Analysis</h2>
 
-            <p className="emotion">
-              {emotion.toUpperCase()}
-            </p>
+            {emotion ? (
+              <>
+                <div className="emotion-text">
+                  {emotion}
+                </div>
 
-            <p>
-              Confidence: {confidence}%
-            </p>
+                <p>
+                  Confidence: {confidence}%
+                </p>
+              </>
+            ) : (
+              <p>No analysis yet</p>
+            )}
           </div>
-        )}
-      
-{spamData && (
-  <div className="card">
 
-    <h2>Spam Analysis</h2>
+          <div className="card spam-card">
+            <h2>Spam Detection</h2>
 
-    <p>
-      <strong>Spam Call:</strong>{" "}
-      {spamData.is_spam ? "YES" : "NO"}
-    </p>
+            {spamData ? (
+              <>
+                <p>
+                  <strong>Spam:</strong>
+                  {spamData.is_spam ? " YES" : " NO"}
+                </p>
 
-    <p>
-      <strong>Risk Level:</strong>{" "}
-      {spamData.risk_level}
-    </p>
+                <p>
+                  <strong>Risk Level:</strong>
+                  {spamData.risk_level}
+                </p>
 
-    <p>
-      <strong>Spam Score:</strong>{" "}
-      {spamData.spam_score}
-    </p>
+                <p>
+                  <strong>Spam Score:</strong>
+                  {spamData.spam_score}
+                </p>
 
-    <p>
-      <strong>Detected Keywords:</strong>
-    </p>
+                <div className="keyword-box">
+                  {spamData.detected_keywords.length > 0 ? (
+                    spamData.detected_keywords.map((word, index) => (
+                      <span className="keyword" key={index}>
+                        {word}
+                      </span>
+                    ))
+                  ) : (
+                    <p>No suspicious keywords</p>
+                  )}
+                </div>
+              </>
+            ) : (
+              <p>No spam analysis yet</p>
+            )}
+          </div>
 
-    <ul>
-      {spamData.detected_keywords.map((word, index) => (
-        <li key={index}>{word}</li>
-      ))}
-    </ul>
+        </div>
 
-  </div>
-)}
+        <div className="bottom-grid">
 
+          <div className="card summary-card">
+            <h2>AI Summary</h2>
 
-        {transcript && (
-          <div className="card">
+            <div className="scroll-box">
+              {summary || "Summary will appear here..."}
+            </div>
+          </div>
+
+          <div className="card transcript-card">
             <h2>Transcript</h2>
-            <p>{transcript}</p>
-          </div>
-        )}
 
-        {summary && (
-          <div className="card">
-            <h2>Summary</h2>
-            <p>{summary}</p>
+            <div className="scroll-box">
+              {transcript || "Transcript will appear here..."}
+            </div>
           </div>
-        )}
 
-        
+        </div>
 
       </div>
 
