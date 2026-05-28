@@ -14,6 +14,9 @@ function App() {
   const [confidence, setConfidence] = useState("");
 
   const [loading, setLoading] = useState(false);
+  
+const [spamData, setSpamData] = useState(null);
+
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -48,6 +51,10 @@ function App() {
 
       setEmotion(response.data.emotion_analysis.emotion);
       setConfidence(response.data.emotion_analysis.confidence);
+      setSpamData(response.data.spam_analysis);
+
+
+
 
     } catch (error) {
 
@@ -74,7 +81,10 @@ function App() {
 
         <input
           type="file"
-          accept="audio/*"
+          
+          accept="audio/*,video/*"
+
+
           onChange={handleFileChange}
         />
 
@@ -101,6 +111,41 @@ function App() {
             </p>
           </div>
         )}
+      
+{spamData && (
+  <div className="card">
+
+    <h2>Spam Analysis</h2>
+
+    <p>
+      <strong>Spam Call:</strong>{" "}
+      {spamData.is_spam ? "YES" : "NO"}
+    </p>
+
+    <p>
+      <strong>Risk Level:</strong>{" "}
+      {spamData.risk_level}
+    </p>
+
+    <p>
+      <strong>Spam Score:</strong>{" "}
+      {spamData.spam_score}
+    </p>
+
+    <p>
+      <strong>Detected Keywords:</strong>
+    </p>
+
+    <ul>
+      {spamData.detected_keywords.map((word, index) => (
+        <li key={index}>{word}</li>
+      ))}
+    </ul>
+
+  </div>
+)}
+
+
         {transcript && (
           <div className="card">
             <h2>Transcript</h2>

@@ -2,6 +2,11 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import whisper
 import os
+import re
+from spam_keywords import SPAM_KEYWORDS
+
+
+
 
 from transformers import pipeline
 
@@ -33,6 +38,41 @@ emotion_classifier = pipeline(
     top_k=1
 )
 print("Emotion classifier loaded!")
+
+def detect_spam_call(transcript):
+
+    spam_keywords = SPAM_KEYWORDS
+
+
+
+    transcript_lower = transcript.lower()
+
+    detected_keywords = []
+
+    for keyword in spam_keywords:
+
+        if re.search(r"\b" + re.escape(keyword) + r"\b", transcript_lower):
+
+            detected_keywords.append(keyword)
+
+    spam_score = len(detected_keywords)
+
+    if spam_score >= 4:
+        risk_level = "HIGH"
+    elif spam_score >= 2:
+        risk_level = "MEDIUM"
+    else:
+        risk_level = "LOW"
+
+    is_spam = spam_score >= 2
+
+    return {
+        "is_spam": is_spam,
+        "risk_level": risk_level,
+        "spam_score": spam_score,
+        "detected_keywords": detected_keywords
+    }
+
 
 # -----------------------------
 # ROUTE
@@ -97,6 +137,14 @@ def upload_file():
         confidence = round(emotion_result[0][0]["score"] * 100, 2)
 
         # -----------------------------
+        # SPAM DETECTION
+        # -----------------------------
+
+        print("Checking spam risk...")
+
+        spam_analysis = detect_spam_call(transcript)
+
+        # -----------------------------
         # CLEANUP
         # -----------------------------
 
@@ -110,11 +158,15 @@ def upload_file():
         return jsonify({
             "transcript": transcript,
             "summary": summary,
+
             "emotion_analysis": {
                 "emotion": emotion,
                 "confidence": confidence
-            }
+            },
+
+            "spam_analysis": spam_analysis
         })
+
 
     except Exception as e:
         return jsonify({
