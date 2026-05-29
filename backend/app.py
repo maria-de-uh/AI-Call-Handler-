@@ -4,10 +4,6 @@ import whisper
 import os
 import re
 from spam_keywords import SPAM_KEYWORDS
-
-
-
-
 from transformers import pipeline
 
 app = Flask(__name__)
